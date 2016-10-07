@@ -2,7 +2,7 @@
 import dill
 from threading import Thread
 
-import aiohttp
+#import aiohttp
 
 import time
 from easyquant.event_engine import Event
@@ -21,7 +21,8 @@ class BaseEngine:
         self.event_engine = event_engine
         self.clock_engine = clock_engine
         self.is_active = True
-        self.quotation_thread = Thread(target=self.push_quotation, name="QuotationEngine.%s" % self.EventType)
+        self.quotation_thread = Thread(
+            target=self.push_quotation, name="QuotationEngine.%s" % self.EventType)
         self.quotation_thread.setDaemon(False)
         self.init()
 
@@ -35,7 +36,7 @@ class BaseEngine:
         while self.is_active:
             try:
                 response_data = self.fetch_quotation()
-            except aiohttp.errors.ServerDisconnectedError:
+            except Exception as ex:
                 self.wait()
                 continue
             event = Event(event_type=self.EventType, data=response_data)
@@ -49,7 +50,7 @@ class BaseEngine:
     def init(self):
         # do something init
         pass
-    
+
     def wait(self):
         interval = self.PushInterval
         if interval < 1:

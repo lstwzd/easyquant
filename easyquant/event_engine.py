@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 from collections import defaultdict
-from queue import Queue, Empty
+from Queue import Queue, Empty
 from threading import Thread
 
 
@@ -33,7 +35,8 @@ class EventEngine:
         while self.__active:
             try:
                 event = self.__queue.get(block=True, timeout=1)
-                handle_thread = Thread(target=self.__process, name="EventEngine.__process", args=(event,))
+                handle_thread = Thread(
+                    target=self.__process, name="EventEngine.__process", args=(event,))
                 handle_thread.start()
             except Empty:
                 pass

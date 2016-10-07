@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 import datetime
 from collections import deque
 from threading import Thread
@@ -13,12 +13,14 @@ from ..event_engine import Event
 
 
 class Clock:
+
     def __init__(self, trading_time, clock_event):
         self.trading_state = trading_time
         self.clock_event = clock_event
 
 
 class ClockIntervalHandler:
+
     def __init__(self, clock_engine, interval, trading=True, call=None):
         """
         :param interval: float(minute)
@@ -49,6 +51,7 @@ class ClockIntervalHandler:
 
 
 class ClockMomentHandler:
+
     def __init__(self, clock_engine, clock_type, moment=None, is_trading_date=True, makeup=False, call=None):
         """
         :param clock_type:
@@ -64,8 +67,8 @@ class ClockMomentHandler:
         self.makeup = makeup
         self.call = call or (lambda: None)
         self.next_time = datetime.datetime.combine(
-                self.clock_engine.now_dt.date(),
-                self.moment,
+            self.clock_engine.now_dt.date(),
+            self.moment,
         )
 
         if not self.makeup and self.is_active():
@@ -83,8 +86,8 @@ class ClockMomentHandler:
                 next_date = self.next_time.date() + datetime.timedelta(days=1)
 
             self.next_time = datetime.datetime.combine(
-                    next_date,
-                    self.moment
+                next_date,
+                self.moment
             )
 
     def is_active(self):
@@ -112,9 +115,11 @@ class ClockEngine:
 
         self.event_engine = event_engine
         self.is_active = True
-        self.clock_engine_thread = Thread(target=self.clocktick, name="ClockEngine.clocktick")
+        self.clock_engine_thread = Thread(
+            target=self.clocktick, name="ClockEngine.clocktick")
         self.sleep_time = 1
-        self.trading_state = True if (etime.is_tradetime(datetime.datetime.now()) and etime.is_trade_date(datetime.datetime.now())) else False
+        self.trading_state = True if (etime.is_tradetime(datetime.datetime.now(
+        )) and etime.is_trade_date(datetime.datetime.now())) else False
         self.clock_moment_handlers = deque()
         self.clock_interval_handlers = set()
 
@@ -130,19 +135,23 @@ class ClockEngine:
         def _open():
             self.trading_state = True
 
-        self._register_moment('open', datetime.time(9, tzinfo=self.tzinfo), makeup=True, call=_open)
+        self._register_moment('open', datetime.time(
+            9, tzinfo=self.tzinfo), makeup=True, call=_open)
 
         # 中午休市
-        self._register_moment('pause', datetime.time(11, 30, tzinfo=self.tzinfo), makeup=True)
+        self._register_moment('pause', datetime.time(
+            11, 30, tzinfo=self.tzinfo), makeup=True)
 
         # 下午开盘
-        self._register_moment('continue', datetime.time(13, tzinfo=self.tzinfo), makeup=True)
+        self._register_moment('continue', datetime.time(
+            13, tzinfo=self.tzinfo), makeup=True)
 
         # 收盘事件
         def close():
             self.trading_state = False
 
-        self._register_moment('close', datetime.time(15, tzinfo=self.tzinfo), makeup=True, call=close)
+        self._register_moment('close', datetime.time(
+            15, tzinfo=self.tzinfo), makeup=True, call=close)
 
         # 间隔事件
         for interval in (0.5, 1, 5, 15, 30, 60):
@@ -196,7 +205,8 @@ class ClockEngine:
                 break
 
     def push_event_type(self, clock_handler):
-        event = Event(event_type=self.EventType, data=Clock(self.trading_state, clock_handler.clock_type))
+        event = Event(event_type=self.EventType, data=Clock(
+            self.trading_state, clock_handler.clock_type))
         self.event_engine.put(event)
 
     def stop(self):
@@ -213,7 +223,8 @@ class ClockEngine:
 
     def _register_moment(self, clock_type, moment, is_trading_date=True, makeup=False, call=None):
         handlers = list(self.clock_moment_handlers)
-        handler = ClockMomentHandler(self, clock_type, moment, is_trading_date, makeup, call)
+        handler = ClockMomentHandler(
+            self, clock_type, moment, is_trading_date, makeup, call)
         handlers.append(handler)
 
         # 触发事件重新排序

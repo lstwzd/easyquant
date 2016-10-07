@@ -5,9 +5,12 @@ pandas
 requests
 logbook
 anyjson
-aiohttp
+#aiohttp
+grequests
 easytrader
 easyquotation
 arrow
 tushare
 xlrd
+pathlib
+redis
